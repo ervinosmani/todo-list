@@ -1,7 +1,7 @@
 <?php 
 require_once 'db.php';
 
-//Merr te gjitha detyrat nga databaza
+//Merr te gjitha tasks nga databaza
 $sql = "SELECT * FROM tasks ORDER BY created_at DESC";
 $stmt = $conn->prepare($sql);
 $stmt->execute();
@@ -27,12 +27,21 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                 </form>
 
+                <!-- Shfaqja e tasks nga databaza -->
                 <?php foreach ($tasks as $task): ?>
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <?= htmlspecialchars($task['title']) ?>
-                        <span class="badge bg-<?= $task['completed'] ? 'success' : 'warning' ?>">
-                            <?= $task['completed'] ? 'Done' : 'Pending' ?>
-                        </span>
+                        <div class="d-flex align-items-center justify-content-between w-100">
+                            <span><?= htmlspecialchars($task['title']) ?></span>
+                            <div class="d-flex gap-2">
+                                <span class="badge bg-<?= $task['completed'] ? 'success' : 'warning' ?>">
+                                    <?= $task['completed'] ? 'Done' : 'Pending' ?>
+                                </span>
+                                <form action="delete.php" method="POST">
+                                    <input type="hidden" name="id" value="<?= $task['id'] ?>">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                </form>
+                            </div>
+                        </div>
                     </li>
                 <?php endforeach; ?>
             </ul>
