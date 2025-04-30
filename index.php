@@ -40,6 +40,14 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <input type="hidden" name="id" value="<?= $task['id'] ?>">
                                     <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                                 </form>
+
+                                <form action="toggle.php" method="POST">
+                                    <input type="hidden" name="id" value="<?= $task['id'] ?>">
+                                    <input type="hidden" name="completed" value="<?= $task['completed'] ?>">
+                                    <button type="submit" class="btn btn-sm btn-outline-success">
+                                        <?= $task['completed'] ? 'Undo' : 'Mark Done' ?>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </li>
