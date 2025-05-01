@@ -1,38 +1,45 @@
 <?php 
+// Lidhja me databazen permes PDO (eshte e ndare ne nje file tjeter per organizim)
 require_once 'db.php';
 
-//Merr te gjitha tasks nga databaza
+// Merr vleren e filtrit (done, pending ose bosh)
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $filter = isset($_GET['filter']) ? $_GET['filter'] : '';
 
+// Krijojme dy variabla per te ndertuar kushtet ne menyre dinamike
 $where = [];
 $params = [];
 
+// Nese perdoruesi ka shkruar ndonje fjale per kerkim, shtohet si kusht ne query
 if (!empty($search)) {
     $where[] = "title LIKE :search";
     $params[':search'] = "%$search%";
 }
 
+// Shtohet filter shtese nese eshte zgjedhur "done" apo "pending"
 if ($filter === 'done') {
     $where[] = "completed = 1";
 } elseif ($filter === 'pending') {
     $where[] = "completed = 0";
 }
 
+// Nese ka ndonje kusht, ndertojme string-un final WHERE
 $whereSql = '';
 if (!empty($where)) {
     $whereSql = 'WHERE ' . implode(' AND ', $where);
 }
 
+// Krijojme query per te marre te gjitha detyrat, me filtrat e aplikuar
 $sql = "SELECT * FROM tasks $whereSql ORDER BY created_at DESC";
-$stmt = $conn->prepare($sql);
+$stmt = $conn->prepare($sql); // Pergatitja e query-t
 
+// Lidhja e parametrave te kerkimit ne menyre te sigurt permes bindValue
 foreach ($params as $key => $value) {
     $stmt->bindValue($key, $value, PDO::PARAM_STR);
 }
 
-$stmt->execute();
-$tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$stmt->execute(); // Ekzekutohet query
+$tasks = $stmt->fetchAll(PDO::FETCH_ASSOC); // Rezultatet ruhen ne forme array associative
 ?>
 
 <!DOCTYPE html>
@@ -45,13 +52,15 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <body class="bg-light">
         <div class="container py-5">
             <h1 class="mb-4">My To-Do List</h1>
-
+     
+            <!-- Mesazhi i gabimit nese perdoruesi ka futur nje titull te pavlefshem -->
             <?php if (isset($_GET['error'])): ?>
                 <div class="alert alert-danger">
                     <?= htmlspecialchars($_GET['error']) ?>
                 </div>
             <?php endif; ?>
 
+            <!-- Forma per kerkim + filtrimi (All, Done, Pending) -->
             <form method="GET" class="mb-4">
                 <div class="row g-2">
                     <div class="col-md-6">
@@ -71,7 +80,19 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
             </form>
 
+            <!-- Butoni per fshirje te detyrave te perfunduara -->
+            <div class="d-flex justify-content-end mb-4">
+                <form action="clear_completed.php" method="POST">
+                    <button type="submit" class="btn btn-danger btn-sm"
+                        onclick="return confirm('Are you sure you want to delete all completed tasks?')">
+                        Delete all completed tasks
+                    </button>
+                </form>
+            </div>
+
+            <!-- Shfaqja e çdo detyre + butonat per veprim -->
             <ul class="list-group">
+                <!-- Forma per shtim te detyres se re -->
                 <form action="add.php" method="POST" class="mt-4">
                     <div class="input-group">
                         <input type="text" name="title" class="form-control" placeholder="add a task..." required>
