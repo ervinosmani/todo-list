@@ -48,6 +48,11 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         <?= $task['completed'] ? 'Undo' : 'Mark Done' ?>
                                     </button>
                                 </form>
+
+                                <form action="edit.php" method="GET">
+                                    <input type="hidden" name="id" value="<?= $task['id'] ?>">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Edit</button>
+                                </form>
                             </div>
                         </div>
                     </li>
