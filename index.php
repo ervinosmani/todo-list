@@ -46,6 +46,12 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="container py-5">
             <h1 class="mb-4">My To-Do List</h1>
 
+            <?php if (isset($_GET['error'])): ?>
+                <div class="alert alert-danger">
+                    <?= htmlspecialchars($_GET['error']) ?>
+                </div>
+            <?php endif; ?>
+
             <form method="GET" class="mb-4">
                 <div class="row g-2">
                     <div class="col-md-6">
