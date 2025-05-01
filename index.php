@@ -3,15 +3,32 @@ require_once 'db.php';
 
 //Merr te gjitha tasks nga databaza
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$filter = isset($_GET['filter']) ? $_GET['filter'] : '';
+
+$where = [];
+$params = [];
 
 if (!empty($search)) {
-    $sql = "SELECT * FROM tasks WHERE title LIKE :search ORDER BY created_at DESC";
-    $stmt = $conn->prepare($sql);
-    $likeSearch = "%$search%";
-    $stmt->bindParam(':search', $likeSearch, PDO::PARAM_STR);
-} else {
-    $sql = "SELECT * FROM tasks ORDER BY created_at DESC";
-    $stmt = $conn->prepare($sql);
+    $where[] = "title LIKE :search";
+    $params[':search'] = "%$search%";
+}
+
+if ($filter === 'done') {
+    $where[] = "completed = 1";
+} elseif ($filter === 'pending') {
+    $where[] = "completed = 0";
+}
+
+$whereSql = '';
+if (!empty($where)) {
+    $whereSql = 'WHERE ' . implode(' AND ', $where);
+}
+
+$sql = "SELECT * FROM tasks $whereSql ORDER BY created_at DESC";
+$stmt = $conn->prepare($sql);
+
+foreach ($params as $key => $value) {
+    $stmt->bindValue($key, $value, PDO::PARAM_STR);
 }
 
 $stmt->execute();
@@ -30,10 +47,21 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <h1 class="mb-4">My To-Do List</h1>
 
             <form method="GET" class="mb-4">
-                <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="Search a task..." value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
-                    <button type="submit" class="btn btn-outline-primary">Search</button>
-                    <a href="index.php" class="btn btn-outline-secondary">Reset</a>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <input type="text" name="search" class="form-control" placeholder="Search a task..." value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
+                    </div>
+                    <div class="col-md-3">
+                        <select name="filter" class="form-select">
+                            <option value="">All</option>
+                            <option value="done" <?= (isset($_GET['filter']) && $_GET['filter'] === 'done') ? 'selected' : '' ?>>Done</option>
+                            <option value="pending" <?= (isset($_GET['filter']) && $_GET['filter'] === 'pending') ? 'selected' : '' ?>>Pending</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-outline-primary w-100">Search</button>
+                        <a href="index.php" class="btn btn-outline-secondary w-100">Reset</a>
+                    </div>
                 </div>
             </form>
 
