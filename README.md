@@ -33,5 +33,5 @@ This project includes full CRUD functionality, search, filtering, and input vali
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/todo-list.git
+git clone https://github.com/ervinosmani/todo-list.git
 cd todo-list
